@@ -1,0 +1,14 @@
+<resources>
+    <color name="primary">#1E88E5</color>
+    <color name="primary_dark">#1565C0</color>
+    <color name="primary_light">#BBDEFB</color>
+    <color name="accent">#26A69A</color>
+    <color name="surface_card">#FFFFFF</color>
+    <color name="surface_background">#F5F7FA</color>
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+    <color name="border_light">#E0E0E0</color>
+    <color name="metric_bg">#E3F2FD</color>
+    <color name="metric_border">#90CAF9</color>
+    <color name="white">#FFFFFF</color>
+</resources>

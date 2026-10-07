@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">Word Counter App</string>
+    <string name="input_label">Input Text</string>
+    <string name="input_hint">Enter or paste your text here…</string>
+    <string name="btn_calculate">Calculate</string>
+    <string name="btn_generate_test_sentence">Generate Test Sentence</string>
+    <string name="btn_clear_input">Clear Input</string>
+
+    <string name="header_current_results">Current Results</string>
+    <string name="metric_sentences_label">Sentences</string>
+    <string name="metric_words_label">Words</string>
+    <string name="metric_punctuation_label">Punctuation</string>
+    <string name="metric_numbers_label">Numbers</string>
+    <string name="metric_default_value">0</string>
+
+    <string name="header_history">Calculation History (Current Session)</string>
+    <string name="history_empty_placeholder">No calculations performed yet.</string>
+    <string name="history_item_text_label">Text: %1$s</string>
+    <string name="history_item_metrics_format">Sentences: %1$d | Words: %2$d | Punctuation: %3$d | Numbers: %4$d</string>
+    <string name="history_item_compact_format">&quot;%1$s&quot; -&gt; %2$d, %3$d, %4$d, %5$d</string>
+
+    <string name="error_empty_input">Please enter some text before calculating.</string>
+    <string name="test_sentence_loaded">Sample test sentence loaded.</string>
+</resources>
