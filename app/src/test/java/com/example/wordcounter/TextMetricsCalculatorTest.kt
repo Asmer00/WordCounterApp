@@ -7,7 +7,8 @@ import org.junit.Test
 
 /**
  * Unit tests for [TextMetricsCalculator] verifying accurate calculation
- * of sentences, words, punctuation marks, and numbers.
+ * of sentences, words, punctuation marks, and numbers across standard,
+ * edge, Unicode punctuation, contraction, and isolated method invocations.
  */
 class TextMetricsCalculatorTest {
 
@@ -17,6 +18,8 @@ class TextMetricsCalculatorTest {
     fun setUp() {
         calculator = TextMetricsCalculator()
     }
+
+    // --- Original baseline tests ---
 
     @Test
     fun testEmptyAndBlankInput() {
@@ -102,5 +105,130 @@ class TextMetricsCalculatorTest {
         // Punctuation: ¿, ?, ¡, ! -> 4
         assertEquals(4, result.punctuationCount)
         assertEquals(0, result.numberCount)
+    }
+
+    // --- Extended boundary and comprehensive tests ---
+
+    @Test
+    fun testPureDigitsInput() {
+        // "12345 67890" has 10 digits, 0 words (digits only, no letters), 1 sentence, 0 punctuation
+        val result = calculator.calculate("12345 67890")
+        assertEquals(1, result.sentenceCount)
+        assertEquals(0, result.wordCount)
+        assertEquals(0, result.punctuationCount)
+        assertEquals(10, result.numberCount)
+    }
+
+    @Test
+    fun testPurePunctuationInput() {
+        // Only punctuation marks with no alphanumeric characters
+        val result = calculator.calculate("... !? ;;; --- :::")
+        assertEquals(0, result.sentenceCount)
+        assertEquals(0, result.wordCount)
+        assertEquals(14, result.punctuationCount)
+        assertEquals(0, result.numberCount)
+    }
+
+    @Test
+    fun testMultipleConsecutiveSentenceDelimiters() {
+        // "Wait... What?! Really?? Yes!!!"
+        val result = calculator.calculate("Wait... What?! Really?? Yes!!!")
+        assertEquals(4, result.sentenceCount)
+        assertEquals(4, result.wordCount)
+        // Punctuation: ... (3) + ?! (2) + ?? (2) + !!! (3) = 10
+        assertEquals(10, result.punctuationCount)
+        assertEquals(0, result.numberCount)
+    }
+
+    @Test
+    fun testNewlineSeparatedSentences() {
+        val text = "First line without period\nSecond line with dot.\nThird line!"
+        val result = calculator.calculate(text)
+        assertEquals(3, result.sentenceCount)
+        assertEquals(10, result.wordCount)
+        assertEquals(2, result.punctuationCount)
+        assertEquals(0, result.numberCount)
+    }
+
+    @Test
+    fun testTypographicQuotesAndContractions() {
+        // Using Unicode curly apostrophe ’ and curly quotes “ ”
+        val text = "“Don’t worry, it’s all right,” she whispered."
+        val result = calculator.calculate(text)
+        assertEquals(1, result.sentenceCount)
+        // Words: Don’t, worry, it’s, all, right, she, whispered -> 7 words
+        assertEquals(7, result.wordCount)
+        // Punctuation: “ (initial quote), ’ (final quote), , (other), ’ (final quote), , (other), ” (final quote), . (other) -> 7
+        assertEquals(7, result.punctuationCount)
+        assertEquals(0, result.numberCount)
+    }
+
+    @Test
+    fun testAllUnicodePunctuationCategories() {
+        // Test characters representing every Unicode category checked in isPunctuation:
+        // CONNECTOR_PUNCTUATION: _
+        // DASH_PUNCTUATION: - (hyphen), — (em-dash), – (en-dash)
+        // START_PUNCTUATION: (, [, {, «
+        // END_PUNCTUATION: ), ], }, »
+        // INITIAL_QUOTE_PUNCTUATION: ‘, “
+        // FINAL_QUOTE_PUNCTUATION: ’, ”
+        // OTHER_PUNCTUATION: ., ,, !, ?, :, ;, /, \
+        val testPunctuation = "_ - — – ( [ { « ) ] } » ‘ “ ’ ” . , ! ? : ; / \\"
+        val count = calculator.countPunctuationMarks(testPunctuation)
+        assertEquals(24, count)
+    }
+
+    @Test
+    fun testEnglishSentenceWithNumbersAndPunctuation() {
+        val text = "Hello world! Testing 2026!"
+        val result = calculator.calculate(text)
+        assertEquals(2, result.sentenceCount)
+        assertEquals(3, result.wordCount)
+        assertEquals(2, result.punctuationCount)
+        assertEquals(4, result.numberCount)
+    }
+
+    @Test
+    fun testIsolatedCountSentences() {
+        assertEquals(0, calculator.countSentences(""))
+        assertEquals(0, calculator.countSentences("   \n\t "))
+        assertEquals(0, calculator.countSentences("... !? ---"))
+        assertEquals(1, calculator.countSentences("Just one sentence without terminator"))
+        assertEquals(1, calculator.countSentences("One sentence with period."))
+        assertEquals(2, calculator.countSentences("Sentence one. Sentence two!"))
+        assertEquals(3, calculator.countSentences("One.\nTwo!\nThree?"))
+    }
+
+    @Test
+    fun testIsolatedCountWords() {
+        assertEquals(0, calculator.countWords(""))
+        assertEquals(0, calculator.countWords("   \t\n  "))
+        assertEquals(0, calculator.countWords("12345 67890"))
+        assertEquals(0, calculator.countWords("... --- !!!"))
+        assertEquals(1, calculator.countWords("Word"))
+        assertEquals(2, calculator.countWords("Hello World"))
+        assertEquals(1, calculator.countWords("state-of-the-art"))
+        assertEquals(2, calculator.countWords("They're don't"))
+    }
+
+    @Test
+    fun testIsolatedCountPunctuationMarks() {
+        assertEquals(0, calculator.countPunctuationMarks(""))
+        assertEquals(0, calculator.countPunctuationMarks("   "))
+        assertEquals(0, calculator.countPunctuationMarks("Alphabet123"))
+        assertEquals(4, calculator.countPunctuationMarks("a, b; c: d."))
+        assertEquals(8, calculator.countPunctuationMarks("«[({ })]»"))
+        // Check non-punctuation symbols (currency, math symbols) are not counted as punctuation
+        // $ and + and = are CURRENCY_SYMBOL or MATH_SYMBOL, not PUNCTUATION
+        assertEquals(0, calculator.countPunctuationMarks("$ + = ^ ~ `"))
+    }
+
+    @Test
+    fun testIsolatedCountNumbers() {
+        assertEquals(0, calculator.countNumbers(""))
+        assertEquals(0, calculator.countNumbers("   "))
+        assertEquals(0, calculator.countNumbers("No digits here at all!"))
+        assertEquals(5, calculator.countNumbers("12345"))
+        assertEquals(6, calculator.countNumbers("Apartment 402, floor 3, room 19"))
     }
 }
